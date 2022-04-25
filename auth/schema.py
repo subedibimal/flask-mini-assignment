@@ -1,8 +1,11 @@
 import graphene
 
+from flask_graphql_auth import (
+    create_access_token, create_refresh_token
+)
 from sqlalchemy.exc import IntegrityError
 
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from config.database import db_session
 from config.helpers import check
@@ -40,5 +43,28 @@ class Register(graphene.Mutation):
             return Register(error=f'{ e.orig }')
         return Register(success=True, message="User successfully created.")
 
+
+class AuthMutation(graphene.Mutation):
+    access_token = graphene.String()
+    refresh_token = graphene.String()
+    error = graphene.String()
+
+    class Arguments(object):
+        email = graphene.String()
+        password = graphene.String()
+
+    @classmethod
+    def mutate(cls, root, info, email, password):
+        if not check(email):
+            return AuthMutation(error="Invalid email provided.")
+        user = User.query.filter_by(email=email).first()
+        if not user or not check_password_hash(user.password, password):
+            return AuthMutation(error="Your username or password is incorrect.")
+        return AuthMutation(
+            access_token=create_access_token(user.id),
+            refresh_token=create_refresh_token(user.id),
+        )
+
 class Mutation(graphene.ObjectType):
     register = Register.Field()
+    auth = AuthMutation.Field()
