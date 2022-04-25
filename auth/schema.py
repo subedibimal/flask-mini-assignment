@@ -1,7 +1,8 @@
 import graphene
 
 from flask_graphql_auth import (
-    create_access_token, create_refresh_token, get_jwt_identity, query_header_jwt_required
+    create_access_token, create_refresh_token, get_jwt_identity, query_header_jwt_required,
+    mutation_jwt_refresh_token_required
 )
 from sqlalchemy.exc import IntegrityError
 
@@ -67,9 +68,27 @@ class AuthMutation(graphene.Mutation):
         )
 
 
+class RefreshMutation(graphene.Mutation):
+    access_token = graphene.String()
+    refresh_token = graphene.String()
+
+    class Arguments(object):
+        refresh_token = graphene.String()
+
+    @classmethod
+    @mutation_jwt_refresh_token_required
+    def mutate(cls, root):
+        current_user = get_jwt_identity()
+        return RefreshMutation(
+            access_token=create_access_token(identity=current_user), 
+            refresh_token=create_refresh_token(identity=current_user)
+            )
+
+
 class Mutation(graphene.ObjectType):
     register = Register.Field()
     auth = AuthMutation.Field()
+    token = RefreshMutation.Field()
 
 
 class Query(graphene.ObjectType):
