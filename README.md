@@ -1,5 +1,5 @@
 # flask-mini-assignment
-This is [Flask](https://flask.palletsprojects.com/) project which registers users, authenticates them and fetches their profile using [`GraphQL`](https://graphql.org/) implemented with Graphene and SQLAlchemy.
+This is [Flask](https://flask.palletsprojects.com/) project which registers users, authenticates them and fetches their profile using [`GraphQL`](https://graphql.org/) implemented with Graphene and SQLAlchemy. Further, functionality to get new access token and refresh token from previous refresh token has also been added in this project.
 
 You can check out [Flask Mini Assignment Deployed](https://bimalsubedi.pythonanywhere.com/graphql) or use the project in your local machine following the following commands!
 
