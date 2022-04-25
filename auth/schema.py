@@ -1,7 +1,7 @@
 import graphene
 
 from flask_graphql_auth import (
-    create_access_token, create_refresh_token
+    create_access_token, create_refresh_token, get_jwt_identity, query_header_jwt_required
 )
 from sqlalchemy.exc import IntegrityError
 
@@ -11,6 +11,7 @@ from config.database import db_session
 from config.helpers import check
 
 from .models import User
+from .serializer import UserType
 
 class Register(graphene.Mutation):
     error = graphene.String()
@@ -65,6 +66,17 @@ class AuthMutation(graphene.Mutation):
             refresh_token=create_refresh_token(user.id),
         )
 
+
 class Mutation(graphene.ObjectType):
     register = Register.Field()
     auth = AuthMutation.Field()
+
+
+class Query(graphene.ObjectType):
+    user = graphene.Field(UserType)
+
+    @classmethod
+    @query_header_jwt_required
+    def resolve_user(cls, root, info, *args):
+        user_id = get_jwt_identity()
+        return User.query.filter_by(id=user_id).first()

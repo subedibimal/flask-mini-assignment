@@ -2,4 +2,4 @@ import graphene
 
 import auth.schema
 
-schema = graphene.Schema(mutation=auth.schema.Mutation)
+schema = graphene.Schema(query=auth.schema.Query, mutation=auth.schema.Mutation)
